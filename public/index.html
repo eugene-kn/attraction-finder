@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Attraction Finder</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" crossorigin="anonymous">
+  <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
+
+  <style>
+    [v-cloak] {
+      display: none;
+    }
+
+    #app {
+      width: 80%;
+      margin-top: 1%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    #app .card {
+      margin-bottom: 1em;
+    }
+
+    #app .badge {
+      margin: 0.1em;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <div class="input-group mb-3">
+      <input v-on:keyup.enter="findAttractions" type="text" class="form-control" placeholder="Enter address to find attractions nearby..."
+        v-model="address" autofocus>
+      <div class="input-group-append">
+        <button @click="findAttractions" class="btn btn-outline-secondary" type="button" :disabled="loading">Find</button>
+      </div>
+    </div>
+
+    <div v-if="loading">Loading...</div>
+
+    <div v-if="attractions.length && !loading" v-cloak>
+      <div v-for="attraction in attractions" class="card" style="width: auto">
+
+        <img v-if="attraction.image_info.images.length" class="card-img-top" :src="attraction.image_info.images[0].sizes.medium.url"
+          alt="Card image cap">
+        <div class="card-body">
+          <h5 class="card-title">{{ attraction.name }}</h5>
+          <p class="card-text">{{ attraction.description }}</p>
+        </div>
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item">
+            <em class="text-secondary">{{ attraction.address.address_string }}</em>
+          </li>
+          <li v-if="attraction.phone" class="list-group-item">&#128383; {{ attraction.phone }}</li>
+          <li v-if="attraction.hours.monday" class="list-group-item">
+            <dl class="row">
+              <template v-for="hours,day in attraction.hours">
+                <dt class="col-sm-3">{{ day }}</dt>
+                <dd class="col-sm-9">{{ hours }}</dd>
+              </template>
+            </dl>
+          </li>
+          <li class="list-group-item">
+            <span v-for="tag in attraction.tags" class="badge badge-info">{{ tag }}</span>
+          </li>
+        </ul>
+
+
+
+        <div class="card-footer">
+          <small class="text-muted">Distance: {{ attraction.distance_miles }} miles</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue-resource"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+
+  <script>
+    toastr.options = {
+      "positionClass": "toast-bottom-center",
+    }
+
+    var app = new Vue({
+      el: '#app',
+
+      data: {
+        address: '',
+        attractions: [],
+        loading: false
+      },
+
+      methods: {
+        findAttractions: function () {
+          console.log('Finding attractions...');
+          this.loading = true;
+
+          this.$http.get('/api/attractions?address=' + this.address).then((response) => {
+            this.loading = false;
+            this.attractions = response.data;
+          }).catch(err => {
+            this.loading = false;
+            console.log(err);
+
+            if (err.body.error) {
+              toastr.error(err.body.error);
+            } else {
+              toastr.error('Something went wrong!');
+            }
+          });
+        }
+      }
+    })
+  </script>
+</body>
+
+</html>

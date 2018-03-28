@@ -1,0 +1,22 @@
+{
+  "name": "attraction-finder",
+  "version": "1.0.0",
+  "description": "Finds nearby attractions",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "engines": {
+    "node": "9.4.0"
+  },
+  "author": "Eugene K",
+  "license": "ISC",
+  "dependencies": {
+    "@google/maps": "^0.4.5",
+    "dotenv": "^5.0.1",
+    "express": "^4.16.3",
+    "q": "^1.5.1",
+    "superagent": "^3.8.2"
+  }
+}
